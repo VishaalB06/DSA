@@ -5,7 +5,12 @@ from data_loader import load_airport_data
 from graph_builder import build_graph
 from dijkstra import dijkstra_airline_aware, dijkstra_standard
 from airline_rules import SUPPORTED_AIRLINES, get_hub
-from web_map import build_map_html
+try:
+    # preferred name
+    from web_map import build_map_html as build_map_html
+except Exception:
+    # backward compatibility: some deployments may have older function name
+    from web_map import build_route_map_html as build_map_html
 
 st.set_page_config(page_title="Flight Route Optimizer", layout="wide")
 
