@@ -1,0 +1,13 @@
+# Airline-Aware Shortest Flight Path System
+# Python 3.8+
+
+pandas>=2.0.0
+openpyxl>=3.1.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+cartopy>=0.22.0
+pillow>=10.0.0
+flask>=3.0.0
+folium>=0.15.0
+streamlit>=1.24.0
+streamlit-folium>=0.12.0

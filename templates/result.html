@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if no_path %}
+    <!-- No Route Found -->
+    <div style="text-align: center; padding: 3rem 2rem; animation: slideUp 0.6s ease-out;">
+        <h2 style="color: #ff6b6b; margin-top: 0;">❌ No Route Available</h2>
+        <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem;">
+            Unfortunately, there is no feasible path from <strong>{{ source }}</strong> to <strong>{{ destination }}</strong> 
+            using the selected airline(s).
+        </p>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">
+            Consider selecting different airlines or cities with broader connectivity.
+        </p>
+        <a href="/" style="display: inline-block; padding: 0.8rem 2rem; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600;">
+            ← Try Another Route
+        </a>
+    </div>
+
+{% else %}
+
+    <!-- Success Animation Container -->
+    <div style="animation: slideUp 0.6s ease-out;">
+
+        <!-- Key Metrics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_km }}</div>
+                <div class="stat-label">Total Distance (km)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ path | length }}</div>
+                <div class="stat-label">Cities in Route</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ segments | length }}</div>
+                <div class="stat-label">Flight Segments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ airlines | join(", ") }}</div>
+                <div class="stat-label" style="text-transform: none;">Carriers Used</div>
+            </div>
+        </div>
+
+        <!-- Route Summary Card -->
+        <div class="route-info">
+            <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                ✨ Optimal Route Summary
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                <div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.3rem;">ORIGIN</p>
+                    <p style="font-size: 1.3rem; font-weight: 700; color: var(--primary-light);">{{ source }}</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.3rem;">DESTINATION</p>
+                    <p style="font-size: 1.3rem; font-weight: 700; color: var(--secondary);">{{ destination }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flight Path -->
+        <div style="margin-bottom: 2.5rem;">
+            <h3>📍 Flight Path</h3>
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 1.5rem; background: rgba(45, 55, 72, 0.3); border: 1px solid var(--dark-border); border-radius: 12px; animation: slideUp 0.6s ease-out 0.1s both;">
+                {% for city in path %}
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3); margin: 0 auto 0.5rem;">
+                            {{ loop.index }}
+                        </div>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">{{ city }}</div>
+                    </div>
+                    {% if not loop.last %}
+                        <div style="color: var(--text-muted); font-size: 1.5rem;">→</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Flight Segments Timeline -->
+        <div style="margin-bottom: 2.5rem;">
+            <h3>✈️ Flight Itinerary</h3>
+            {% if segments %}
+                <div class="timeline">
+                    {% for from_city, to_city, airline in segments %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">{{ loop.index }}</div>
+                            <div class="timeline-content">
+                                <strong>{{ from_city }} → {{ to_city }}</strong>
+                                {% if airline %}
+                                    <div class="badge {% if airline == 'Qatar Airways' %}qatar{% elif airline == 'Emirates' %}emirates{% elif airline == 'Etihad' %}etihad{% endif %}">
+                                        {{ airline }}
+                                    </div>
+                                {% else %}
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Transfer</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Comparison Section -->
+        {% if comparison %}
+            <div class="comparison">
+                <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    📊 Unrestricted Route Comparison
+                </h3>
+                <p style="margin: 1rem 0; color: var(--text-secondary);">
+                    <strong>Standard Dijkstra (using all airlines):</strong>
+                </p>
+                <div style="padding: 1rem; background: rgba(45, 55, 72, 0.5); border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--secondary);">
+                    <p style="margin: 0.5rem 0; color: var(--text-secondary);">
+                        <strong style="color: var(--text-primary);">Distance:</strong> {{ comparison.std_km }} km
+                    </p>
+                    <p style="margin: 0.5rem 0; color: var(--text-secondary); word-break: break-word;">
+                        <strong style="color: var(--text-primary);">Path:</strong> {{ comparison.std_path | join(" → ") }}
+                    </p>
+                </div>
+
+                <!-- Comparison Insight -->
+                {% if comparison.difference > 0 %}
+                    <div style="padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 8px; border-left: 4px solid var(--success);">
+                        <p style="margin: 0; color: var(--success); font-weight: 600;">
+                            ✅ Airline-aware optimization saves {{ comparison.difference }} km!
+                        </p>
+                        <p style="margin: 0.5rem 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+                            Your airline selection maintains efficiency without sacrifice.
+                        </p>
+                    </div>
+                {% elif comparison.difference < 0 %}
+                    <div style="padding: 1rem; background: rgba(255, 180, 0, 0.1); border-radius: 8px; border-left: 4px solid var(--warning);">
+                        <p style="margin: 0; color: var(--warning); font-weight: 600;">
+                            ℹ️ Standard route could save {{ -comparison.difference }} km
+                        </p>
+                        <p style="margin: 0.5rem 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+                            Your airline preferences add {{ -comparison.difference }} km to the total distance.
+                        </p>
+                    </div>
+                {% else %}
+                    <div style="padding: 1rem; background: rgba(0, 102, 255, 0.1); border-radius: 8px; border-left: 4px solid var(--primary);">
+                        <p style="margin: 0; color: var(--primary-light); font-weight: 600;">
+                            🎯 Optimal! Both routes achieve the same distance.
+                        </p>
+                        <p style="margin: 0.5rem 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+                            Your airline selection has no impact on total distance.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Interactive Map -->
+        <div style="margin-top: 3rem;">
+            <h3>🗺️ Route Visualization</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                Interactive map showing the complete route with airline-colored segments and city markers.
+            </p>
+            <div class="map">
+                {{ map_html | safe }}
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--dark-border);">
+            <a href="/" style="display: inline-block; padding: 0.8rem 2rem; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                ← Compute Another Route
+            </a>
+        </div>
+
+    </div>
+
+{% endif %}
+
+{% endblock %}

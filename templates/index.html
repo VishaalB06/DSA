@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div style="text-align: center; margin-bottom: 3rem; animation: slideUp 0.6s ease-out;">
+    <h2 style="margin-top: 0;">Optimize Your Flight Route</h2>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 1rem auto;">
+        Leverage advanced algorithms to find the most efficient airline routes. Select your origin, destination, and preferred carriers to compute the optimal path instantly.
+    </p>
+</div>
+
+{% if error %}
+    <div class="error" style="max-width: 600px; margin: 0 auto 2rem;">
+        ⚠️ {{ error }}
+    </div>
+{% endif %}
+
+<form method="POST" action="/" style="max-width: 700px; margin: 0 auto;">
+    <!-- Source City -->
+    <div class="form-group">
+        <label for="source">🌍 Origin City</label>
+        <select name="source" id="source" required>
+            <option value="">Select your departure city...</option>
+            {% for city in cities %}
+                <option value="{{ city }}" {% if source == city %}selected{% endif %}>{{ city }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Destination City -->
+    <div class="form-group">
+        <label for="destination">✈️ Destination City</label>
+        <select name="destination" id="destination" required>
+            <option value="">Select your arrival city...</option>
+            {% for city in cities %}
+                <option value="{{ city }}" {% if destination == city %}selected{% endif %}>{{ city }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Airlines Section -->
+    <div class="form-group">
+        <label style="display: block; margin-bottom: 1rem;">🏢 Preferred Airlines</label>
+        <div class="checkbox-group">
+            {% for airline in airlines %}
+                {% if airline == "Qatar Airways" %}
+                    <label style="flex-direction: column; align-items: flex-start;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%; margin-bottom: 0.5rem;">
+                            <input type="checkbox" name="airlines" value="{{ airline }}" {% if airline in selected_airlines %}checked{% endif %} style="margin: 0;">
+                            <strong style="margin: 0;">Qatar Airways</strong>
+                        </div>
+                        <span class="badge qatar">🏢 Hub: Doha</span>
+                    </label>
+                {% elif airline == "Emirates" %}
+                    <label style="flex-direction: column; align-items: flex-start;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%; margin-bottom: 0.5rem;">
+                            <input type="checkbox" name="airlines" value="{{ airline }}" {% if airline in selected_airlines %}checked{% endif %} style="margin: 0;">
+                            <strong style="margin: 0;">Emirates</strong>
+                        </div>
+                        <span class="badge emirates">🏢 Hub: Dubai</span>
+                    </label>
+                {% elif airline == "Etihad" %}
+                    <label style="flex-direction: column; align-items: flex-start;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%; margin-bottom: 0.5rem;">
+                            <input type="checkbox" name="airlines" value="{{ airline }}" {% if airline in selected_airlines %}checked{% endif %} style="margin: 0;">
+                            <strong style="margin: 0;">Etihad Airways</strong>
+                        </div>
+                        <span class="badge etihad">🏢 Hub: Abu Dhabi</span>
+                    </label>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div style="text-align: center; margin-top: 2rem;">
+        <button type="submit">
+            🚀 Compute Optimal Route
+        </button>
+    </div>
+</form>
+
+<!-- Info Section -->
+<div style="max-width: 700px; margin: 3rem auto; padding: 2rem; background: rgba(0, 102, 255, 0.05); border: 1px solid var(--dark-border); border-radius: 12px; text-align: center;">
+    <h4 style="margin-top: 0; color: var(--primary-light);">💡 How RouteOptimizer Works</h4>
+    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+        This application uses <strong>Dijkstra's shortest path algorithm</strong> to compute the most efficient route between any two cities, 
+        considering your preferred airlines. Routes are calculated based on hub-based connections and airline-specific route networks.
+    </p>
+</div>
+{% endblock %}
